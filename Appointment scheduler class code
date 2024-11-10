@@ -1,0 +1,96 @@
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
+
+public class AppointmentScheduler {
+    private static Scanner scanner = new Scanner(System.in);
+    private static AppointmentManager manager = new AppointmentManager();
+    private static User loggedInUser = null;
+
+    public static void main(String[] args) {
+        // Create a test user for login
+        User testUser = new User("testUser", "password123");
+        System.out.println("Welcome to the Appointment Scheduler.");
+        login(testUser);
+    }
+
+    // Login process
+    private static void login(User user) {
+        System.out.println("Enter your username: ");
+        String username = scanner.nextLine();
+        System.out.println("Enter your password: ");
+        String password = scanner.nextLine();
+
+        if (user.getUsername().equals(username) && user.checkPassword(password)) {
+            loggedInUser = user;
+            System.out.println("Login successful.");
+            showMenu();
+        } else {
+            System.out.println("Invalid username or password.");
+        }
+    }
+
+    // Show main menu
+    private static void showMenu() {
+        while (true) {
+            System.out.println("\n1. Schedule an appointment");
+            System.out.println("2. Cancel an appointment");
+            System.out.println("3. List all appointments");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    scheduleAppointment();
+                    break;
+                case 2:
+                    cancelAppointment();
+                    break;
+                case 3:
+                    manager.listAppointments();
+                    break;
+                case 4:
+                    System.out.println("Goodbye!");
+                    return;
+                default:
+                    System.out.println("Invalid option.");
+            }
+        }
+    }
+
+    // Schedule an appointment
+    private static void scheduleAppointment() {
+        System.out.print("Enter appointment date and time (yyyy-MM-dd HH:mm): ");
+        String dateTimeInput = scanner.nextLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(dateTimeInput, formatter);
+
+        if (dateTime.isBefore(LocalDateTime.now())) {
+            System.out.println("You cannot schedule an appointment in the past.");
+            return;
+        }
+
+        System.out.print("Enter appointment description: ");
+        String description = scanner.nextLine();
+
+        boolean success = manager.scheduleAppointment(loggedInUser.getUsername(), dateTime, description);
+        if (success) {
+            System.out.println("Appointment scheduled successfully!");
+        }
+    }
+
+    // Cancel an appointment
+    private static void cancelAppointment() {
+        System.out.print("Enter appointment date and time to cancel (yyyy-MM-dd HH:mm): ");
+        String dateTimeInput = scanner.nextLine();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime dateTime = LocalDateTime.parse(dateTimeInput, formatter);
+
+        boolean success = manager.cancelAppointment(loggedInUser.getUsername(), dateTime);
+        if (!success) {
+            System.out.println("Could not cancel appointment.");
+        }
+    }
+}
