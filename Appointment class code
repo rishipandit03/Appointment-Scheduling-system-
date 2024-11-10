@@ -1,0 +1,31 @@
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+public class Appointment implements Serializable {
+    private String userName;
+    private LocalDateTime dateTime;
+    private String description;
+
+    public Appointment(String userName, LocalDateTime dateTime, String description) {
+        this.userName = userName;
+        this.dateTime = dateTime;
+        this.description = description;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String toString() {
+        return "Appointment with " + userName + " on " + dateTime + " for: " + description;
+    }
+}
