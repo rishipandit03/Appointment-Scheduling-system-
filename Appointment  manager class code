@@ -1,0 +1,67 @@
+import java.io.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+public class AppointmentManager {
+    private List<Appointment> appointments;
+    private final String dataFile = "appointments.ser";
+
+    public AppointmentManager() {
+        appointments = loadAppointments();
+    }
+
+    // Load appointments from file
+    private List<Appointment> loadAppointments() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(dataFile))) {
+            return (List<Appointment>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    // Save appointments to file
+    private void saveAppointments() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(dataFile))) {
+            oos.writeObject(appointments);
+        } catch (IOException e) {
+            System.out.println("Error saving appointments: " + e.getMessage());
+        }
+    }
+
+    // Schedule an appointment
+    public boolean scheduleAppointment(String userName, LocalDateTime dateTime, String description) {
+        for (Appointment appointment : appointments) {
+            if (appointment.getDateTime().equals(dateTime)) {
+                System.out.println("This time slot is already taken.");
+                return false;
+            }
+        }
+        appointments.add(new Appointment(userName, dateTime, description));
+        saveAppointments();
+        return true;
+    }
+
+    // Cancel an appointment
+    public boolean cancelAppointment(String userName, LocalDateTime dateTime) {
+        for (Appointment appointment : appointments) {
+            if (appointment.getDateTime().equals(dateTime) && appointment.getUserName().equals(userName)) {
+                appointments.remove(appointment);
+                saveAppointments();
+                System.out.println("Appointment cancelled.");
+                return true;
+            }
+        }
+        System.out.println("No appointment found at the specified time.");
+        return false;
+    }
+
+    // List all appointments
+    public void listAppointments() {
+        if (appointments.isEmpty()) {
+            System.out.println("No appointments scheduled.");
+        } else {
+            appointments.forEach(System.out::println);
+        }
+    }
+}
